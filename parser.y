@@ -327,26 +327,33 @@ BlockItem:
         $$ = create_ast_node(Node_BlockItem, "BlockItem", 4);
         add_child($$, $1);
     }
-    |error SEMICN {  // 错误恢复：跳过错误的语句直到分号
-        int err_line = yylineno;
-        add_syntax_error(err_line, "Missing \";\"");
-        $$ = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
+    | error SEMICN {  // 错误恢复：跳过错误的语句直到分号
+        // Bison 错误恢复会读取多个 token，导致 yylineno 推进多行
+        // 对于缺少分号的错误，通常是前两行的某处，这里回溯2行
+        int error_line = yylineno >= 2 ? yylineno - 2 : yylineno;
+        // 确保不会回到第0行或负数
+        if (error_line < 1) error_line = 1;
+        add_syntax_error(error_line, "Missing \";\"");
+        $$ = create_ast_node(Node_BlockItem, "BlockItem", error_line);
         yyerrok;  // 恢复解析状态
     }
     ;
 
 Stmt:
     LVal ASSIGN Exp SEMICN {
-        $$ = create_ast_node(Node_Stmt, "Stmt", 4);
+        int stmt_line = ($1 && $1->line > 0) ? $1->line : yylineno;
+        $$ = create_ast_node(Node_Stmt, "Stmt", stmt_line);
         add_child($$, $1);
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
         add_child($$, create_token_node(SEMICN, "SEMICN", $4));
     }
     | LVal ASSIGN Exp ELSETK {  // 缺少分号，后面跟 else
-        int err_line = yylineno;
-        add_syntax_error(err_line, "Missing \";\"");
-        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        // 关键：使用 LVal 的行号（第1个符号），而不是当前 yylineno
+        // 因为当解析器看到 else 时，yylineno 已经推进了
+        int error_line = ($1 && $1->line > 0) ? $1->line : yylineno;
+        add_syntax_error(error_line, "Missing \";\"");
+        $$ = create_ast_node(Node_Stmt, "Stmt", error_line);
         add_child($$, $1);
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
@@ -354,21 +361,24 @@ Stmt:
     }
 
     | Exp SEMICN {
-        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        int stmt_line = ($1 && $1->line > 0) ? $1->line : yylineno;
+        $$ = create_ast_node(Node_Stmt, "Stmt", stmt_line);
         add_child($$, $1);
         add_child($$, create_token_node(SEMICN, "SEMICN", $2));
     }
     | Exp error {  // 通用的错误恢复：表达式语句缺少分号
-        int err_line = yylineno;
-        add_syntax_error(err_line, "Missing \";\"");
-        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        // 使用表达式的行号而不是当前 yylineno（已推进）
+        int error_line = ($1 && $1->line > 0) ? $1->line : yylineno;
+        add_syntax_error(error_line, "Missing \";\"");
+        $$ = create_ast_node(Node_Stmt, "Stmt", error_line);
         add_child($$, $1);
         yyerrok;  // 恢复解析状态
     }
     | LVal ASSIGN Exp error {  // 通用的错误恢复：缺少分号
-        int err_line = yylineno;
-        add_syntax_error(err_line, "Missing \";\"");
-        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        // 使用 LVal 的行号（最开始解析该语句时的行号）
+        int error_line = ($1 && $1->line > 0) ? $1->line : yylineno;
+        add_syntax_error(error_line, "Missing \";\"");
+        $$ = create_ast_node(Node_Stmt, "Stmt", error_line);
         add_child($$, $1);
         add_child($$,create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
@@ -458,7 +468,7 @@ LVal:
         add_child($$, $3);
         add_child($$, create_token_node(RBRACKET, "RBRACKET", $4));
     }
-    | ID LBRACKET Exp COMMA Exp RBRACKET {  // 错误：a[5,3] 应该是 a[5][3]
+    | ID LBRACKET Exp COMMA Exp RBRACKET error{  // 错误：a[5,3] 应该是 a[5][3]
     int err_line = yylineno;  // 这里依然用当前行号
         add_syntax_error(err_line, "Missing \"]\"");
         $$ = create_ast_node(Node_LVal, "LVal", yylineno);
