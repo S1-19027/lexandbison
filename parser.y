@@ -328,11 +328,21 @@ Stmt:
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
         add_child($$, create_token_node(SEMICN, "SEMICN", $4));
-    }
-    | Exp SEMICN {
+    }    | LVal ASSIGN Exp %prec RBRACE {  // 缺少分号的赋值语句（低优先级）
+        add_syntax_error(yylineno, "Missing \";\"");
+        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        add_child($$, $1);
+        add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
+        add_child($$, $3);
+    }    | Exp SEMICN {
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, $1);
         add_child($$, create_token_node(SEMICN, "SEMICN", $2));
+    }
+    | Exp %prec RBRACE {  // 缺少分号的表达式语句（低优先级）
+        add_syntax_error(yylineno, "Missing \";\"");
+        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        add_child($$, $1);
     }
     | SEMICN {
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
@@ -389,19 +399,6 @@ Stmt:
         add_child($$, $2);
         add_child($$, create_token_node(SEMICN, "SEMICN", $3));
     }
-        | LVal ASSIGN Exp {  // 处理赋值语句缺少分号的情况
-        // 使用当前行号来报告错误
-        int error_line = yylineno;  // 在此时手动保存 yylineno，确保行号不被后续解析影响
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Missing \";\".");
-        add_syntax_error(error_line, error_msg);
-        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
-        add_child($$, $1);
-        add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
-        add_child($$, $3);
-        // 强制终止解析，避免后续错误
-        YYABORT;
-    }
     ;
 
 Exp:
@@ -430,32 +427,15 @@ LVal:
         add_child($$, $3);
         add_child($$, create_token_node(RBRACKET, "RBRACKET", $4));
     }
-    | ID LBRACKET Exp RBRACKET LBRACKET Exp RBRACKET {
+    | ID LBRACKET Exp COMMA Exp RBRACKET {  // 错误：a[5,3] 应该是 a[5][3]
+        add_syntax_error(yylineno, "Missing \"]\"");
         $$ = create_ast_node(Node_LVal, "LVal", yylineno);
-        add_child($$, create_token_node(ID, "ID", $1));
-        add_child($$, create_token_node(LBRACKET, "LBRACKET", $2));
-        add_child($$, $3);
-        add_child($$, create_token_node(RBRACKET, "RBRACKET", $4));
-        add_child($$, create_token_node(LBRACKET, "LBRACKET", $5));
-        add_child($$, $6);
-        add_child($$, create_token_node(RBRACKET, "RBRACKET", $7));
-    }
-     | ID LBRACKET Exp COMMA Exp RBRACKET {  // 处理 a[5, 3] 错误
-        // 使用当前行号来报告错误
-        int error_line = yylineno;  // 在此时手动保存 yylineno，确保行号不被后续解析影响
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Missing \"]\".");
-        add_syntax_error(error_line, error_msg);
-        
-        $$ = create_ast_node(Node_LVal, "LVal", yylineno);  // 创建空的节点避免后续分析崩溃
         add_child($$, create_token_node(ID, "ID", $1));
         add_child($$, create_token_node(LBRACKET, "LBRACKET", $2));
         add_child($$, $3);
         add_child($$, create_token_node(COMMA, "COMMA", $4));
         add_child($$, $5);
         add_child($$, create_token_node(RBRACKET, "RBRACKET", $6));
-        // 强制终止解析，避免后续错误
-        YYABORT;
     }
     ;
 
@@ -734,14 +714,14 @@ void print_ast(ASTNode* node, int depth) {
 
 
 void yyerror(const char* s) {
-    // Bison的默认错误处理，直接使用add_syntax_error
-    add_syntax_error(yylineno, s);
+    // 禁用Bison的默认错误处理，避免重复报告
+    // 我们已经在规则中手动处理了错误
 }
 
 void add_syntax_error(int line, const char *msg) {
-        // 防止重复报告相同错误
+    // 防止重复报告相同错误
     for (int i = 0; i < syntax_error_count; i++) {
-        if (syntax_error_list[i].line == line && 
+        if (syntax_error_list[i].line == line &&
             strstr(syntax_error_list[i].message, msg) != NULL) {
             return;  // 如果已经报告过相同的错误，直接跳过
         }
