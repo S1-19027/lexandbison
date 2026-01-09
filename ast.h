@@ -13,6 +13,7 @@ typedef enum
     Node_ConstInitVal,
     Node_VarDecl,
     Node_VarDef,
+    Node_VarDefList,
     Node_InitVal,
     Node_FuncDef,
     Node_FuncFParams,
@@ -53,15 +54,23 @@ typedef struct ASTNode
     struct ASTNode **children; // 子节点数组
     int child_count;           // 子节点数量
     int is_epsilon;            // 是否为空节点标志
+
+    // 语义分析相关属性
+    int data_type;  // 数据类型：0=int, 1=float, 2=void, 3=array
+    int is_array;   // 是否是数组
+    int array_dims; // 数组维度
 } ASTNode;
+
 typedef struct
 {
     int line;          // 错误行号
     char message[100]; // 错误信息
 } Error;
+
 typedef struct
 {
     int line;          // 错误行号
     char message[100]; // 错误信息
 } SyntaxError;
+
 #endif

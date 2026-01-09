@@ -108,7 +108,7 @@ return INTCON;
 }
 
 {Decimal} { yylval.intval = atoi(yytext); return INTCON; }
-{Float} { yylval.str = strdup(yytext);  return INTCON; }
+{Float} { yylval.str = strdup(yytext);  return FLOATCON; }
 
 {Identifier} { yylval.str = strdup(yytext); return ID; }
 "+" {  yylval.str = strdup(yytext); return PLUS; }

@@ -12,6 +12,7 @@ echo "Compiling..."
 gcc -g -o parser \
     parser.tab.c \
     lex.yy.c \
+    semantic.c \
     -lfl
 
 echo "Done! Generated ./parser"

@@ -66,30 +66,30 @@ extern int yydebug;
     RETURNTK = 267,                /* RETURNTK  */
     ID = 268,                      /* ID  */
     INTCON = 269,                  /* INTCON  */
-    PLUS = 270,                    /* PLUS  */
-    MINUS = 271,                   /* MINUS  */
-    MUL = 272,                     /* MUL  */
-    DIV = 273,                     /* DIV  */
-    MOD = 274,                     /* MOD  */
-    ASSIGN = 275,                  /* ASSIGN  */
-    EQ = 276,                      /* EQ  */
-    NEQ = 277,                     /* NEQ  */
-    LT = 278,                      /* LT  */
-    GT = 279,                      /* GT  */
-    LEQ = 280,                     /* LEQ  */
-    GEQ = 281,                     /* GEQ  */
-    AND = 282,                     /* AND  */
-    OR = 283,                      /* OR  */
-    NOT = 284,                     /* NOT  */
-    LPARENT = 285,                 /* LPARENT  */
-    RPARENT = 286,                 /* RPARENT  */
-    LBRACKET = 287,                /* LBRACKET  */
-    RBRACKET = 288,                /* RBRACKET  */
-    LBRACE = 289,                  /* LBRACE  */
-    RBRACE = 290,                  /* RBRACE  */
-    SEMICN = 291,                  /* SEMICN  */
-    COMMA = 292,                   /* COMMA  */
-    ENDFILE = 293                  /* ENDFILE  */
+    FLOATCON = 270,                /* FLOATCON  */
+    PLUS = 271,                    /* PLUS  */
+    MINUS = 272,                   /* MINUS  */
+    MUL = 273,                     /* MUL  */
+    DIV = 274,                     /* DIV  */
+    MOD = 275,                     /* MOD  */
+    ASSIGN = 276,                  /* ASSIGN  */
+    EQ = 277,                      /* EQ  */
+    NEQ = 278,                     /* NEQ  */
+    LT = 279,                      /* LT  */
+    GT = 280,                      /* GT  */
+    LEQ = 281,                     /* LEQ  */
+    GEQ = 282,                     /* GEQ  */
+    AND = 283,                     /* AND  */
+    OR = 284,                      /* OR  */
+    NOT = 285,                     /* NOT  */
+    LPARENT = 286,                 /* LPARENT  */
+    RPARENT = 287,                 /* RPARENT  */
+    LBRACKET = 288,                /* LBRACKET  */
+    RBRACKET = 289,                /* RBRACKET  */
+    LBRACE = 290,                  /* LBRACE  */
+    RBRACE = 291,                  /* RBRACE  */
+    SEMICN = 292,                  /* SEMICN  */
+    COMMA = 293                    /* COMMA  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -98,7 +98,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 35 "parser.y"
+#line 36 "parser.y"
 
     ASTNode* node;
     char* str;

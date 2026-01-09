@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include "ast.h"
 #include "parser.tab.h"
+#include "semantic.h"
 #define MAX_ERRORS 100
 
 //语法树结构
@@ -41,13 +42,14 @@ void add_syntax_error(int line, const char *msg);
 //终结符声明
 %token <str> INTTK FLOATTK VOIDTK CONSTTK IFTK ELSETK WHILETK BREAKTK CONTINUETK RETURNTK
 %token <str> ID 
-%token <intval> INTCON 
+%token <intval> INTCON
+%token <str> FLOATCON
 %token <str> PLUS MINUS MUL DIV MOD ASSIGN EQ NEQ LT GT LEQ GEQ AND OR NOT
 %token <str> LPARENT RPARENT LBRACKET RBRACKET LBRACE RBRACE SEMICN COMMA 
-%token ENDFILE
+
 
 //非终结符声明
-%type <node> CompUnit Decl ConstDecl BType ConstDef ConstInitVal VarDecl VarDef InitVal
+%type <node> CompUnit Decl ConstDecl BType ConstDef ConstInitVal VarDecl VarDef VarDefList VarDefListOpt InitVal
 %type <node> FuncDef FuncType FuncFParams FuncFParam Block BlockItem Stmt Exp Cond LVal
 %type <node> PrimaryExp Number UnaryExp UnaryOp FuncRParams MulExp AddExp FuncFParamDims DeclOrFuncDef DeclOrFuncDefList FuncFParamsOpt FuncRParamsOpt
 %type <node> RelExp EqExp LAndExp LOrExp ConstExp BlockItem_list
@@ -170,11 +172,30 @@ ConstInitVal:
     ;
 
 VarDecl:
-    BType VarDef SEMICN {
+    BType VarDef VarDefListOpt SEMICN {
         $$ = create_ast_node(Node_VarDecl, "VarDecl", 3);
         add_child($$, $1);
         add_child($$, $2);
-        add_child($$, create_token_node(SEMICN, "SEMICN", $3));
+        if ($3) add_child($$, $3);
+        add_child($$, create_token_node(SEMICN, "SEMICN", $4));
+    }
+    ;
+
+VarDefListOpt:
+    /* empty */ { $$ = NULL; }
+    | VarDefList { $$ = $1; }
+    ;
+
+VarDefList:
+    COMMA VarDef {
+        $$ = create_ast_node(Node_VarDefList, "VarDefList", yylineno);
+        add_child($$, create_token_node(COMMA, "COMMA", $1));
+        add_child($$, $2);
+    }
+    | VarDefList COMMA VarDef {
+        $$ = $1;
+        add_child($$, create_token_node(COMMA, "COMMA", $2));
+        add_child($$, $3);
     }
     ;
 
@@ -506,6 +527,10 @@ Number:
         sprintf(buf, "%d", $1);   // ⭐ int → string
         add_child($$, create_token_node(INTCON, "INTCON", buf));
     }
+    | FLOATCON {
+        $$ = create_ast_node(Node_Number, "Number", yylineno);
+        add_child($$, create_token_node(FLOATCON, "FLOATCON", $1));
+    }
 
     ;
 
@@ -678,11 +703,14 @@ ASTNode* create_ast_node(NodeType type, const char* name, int line) {
     node->type = type;
     strcpy(node->name, name);
     node->line = line;
-    node->token_type = ENDFILE;
+    node->token_type = 0; // non-terminal by default
     node->value[0] = '\0';
     node->children = NULL;
     node->child_count = 0;
     node->is_epsilon = 0;
+    node->data_type = 0;      // 默认int类型
+    node->is_array = 0;
+    node->array_dims = 0;
     return node;
 }
 
@@ -700,6 +728,9 @@ ASTNode* create_token_node(int token_type, const char* name, const char* value) 
     node->children = NULL;
     node->child_count = 0;
     node->is_epsilon = 0;
+    node->data_type = 0;
+    node->is_array = 0;
+    node->array_dims = 0;
     return node;
 }
 
@@ -815,7 +846,21 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    print_ast(root, 0);
+    // 执行语义分析
+    if (root) {
+        global_scope = create_scope(NULL);
+        current_scope = global_scope;
+        precollect_functions(root);
+        analyze_ast(root);
+        
+        // 输出语义错误
+        if (semantic_error_count > 0) {
+            print_semantic_errors();
+        }
+    }
+
+    // 调试：打印AST（可选，需要时启用）
+    // print_ast(root, 0);
   
     return 0;
 }
