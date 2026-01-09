@@ -23,8 +23,9 @@ ASTNode* create_ast_node(NodeType type, const char* name, int line);
 ASTNode* create_token_node(int token_type, const char* name, const char* value) ;
 void add_child(ASTNode* parent, ASTNode* child);
 void print_ast(ASTNode* node, int depth);
-void yyerror(const char* s);
 int yylex(void);
+void yyerror(const char* s) ;
+void add_syntax_error(int line, const char *msg);
 
 %}
 
@@ -391,10 +392,9 @@ Stmt:
         | LVal ASSIGN Exp {  // 处理赋值语句缺少分号的情况
         // 使用当前行号来报告错误
         int error_line = yylineno;  // 在此时手动保存 yylineno，确保行号不被后续解析影响
-        syntax_error_list[syntax_error_count].line = error_line;
-        snprintf(syntax_error_list[syntax_error_count].message, sizeof(syntax_error_list[syntax_error_count].message),
-                 "Error type B at Line %d: Missing \";\".", error_line);
-        syntax_error_count++;
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Missing \";\".");
+        add_syntax_error(error_line, error_msg);
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, $1);
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
@@ -441,10 +441,10 @@ LVal:
      | ID LBRACKET Exp COMMA Exp RBRACKET {  // 处理 a[5, 3] 错误
         // 使用当前行号来报告错误
         int error_line = yylineno;  // 在此时手动保存 yylineno，确保行号不被后续解析影响
-        syntax_error_list[syntax_error_count].line = error_line;
-        snprintf(syntax_error_list[syntax_error_count].message, sizeof(syntax_error_list[syntax_error_count].message),
-                 "Error type B at Line %d: Missing \"]\".", error_line);
-        syntax_error_count++;
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Missing \"]\".");
+        add_syntax_error(error_line, error_msg);
+        
         $$ = create_ast_node(Node_LVal, "LVal", yylineno);  // 创建空的节点避免后续分析崩溃
         add_child($$, create_token_node(ID, "ID", $1));
         add_child($$, create_token_node(LBRACKET, "LBRACKET", $2));
@@ -727,15 +727,28 @@ void print_ast(ASTNode* node, int depth) {
     }
 }
 
+
+
 void yyerror(const char* s) {
+    // Bison的默认错误处理，直接使用add_syntax_error
+    add_syntax_error(yylineno, s);
+}
+
+void add_syntax_error(int line, const char *msg) {
+        // 防止重复报告相同错误
+    for (int i = 0; i < syntax_error_count; i++) {
+        if (syntax_error_list[i].line == line && 
+            strstr(syntax_error_list[i].message, msg) != NULL) {
+            return;  // 如果已经报告过相同的错误，直接跳过
+        }
+    }
     if (syntax_error_count < MAX_ERRORS) {
-        syntax_error_list[syntax_error_count].line = yylineno;  // 记录语法错误所在的行号
-        snprintf(syntax_error_list[syntax_error_count].message, sizeof(syntax_error_list[syntax_error_count].message), 
-                 "Error type B at Line %d: %s", yylineno, s);
-        syntax_error_count++;  // 语法错误计数器加1
-    } else {
-        fprintf(stderr, "Too many syntax errors, stopping parsing...\n");
-        has_error = 1;  // 如果错误过多，则中止分析
+        char full_msg[100];
+        snprintf(full_msg, sizeof(full_msg), "Error type B at Line %d: %s", line, msg);
+        syntax_error_list[syntax_error_count].line = line;
+        strcpy(syntax_error_list[syntax_error_count].message, full_msg);
+        syntax_error_count++;
+        has_error = 1;
     }
 }
 
