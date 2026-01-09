@@ -328,21 +328,37 @@ Stmt:
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
         add_child($$, create_token_node(SEMICN, "SEMICN", $4));
-    }    | LVal ASSIGN Exp %prec RBRACE {  // 缺少分号的赋值语句（低优先级）
-        add_syntax_error(yylineno, "Missing \";\"");
+    }
+    | LVal ASSIGN Exp ELSETK {  // 缺少分号，后面跟 else
+        int err_line = yylineno;
+        add_syntax_error(err_line, "Missing \";\"");
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, $1);
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
-    }    | Exp SEMICN {
+        
+    }
+
+    | Exp SEMICN {
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, $1);
         add_child($$, create_token_node(SEMICN, "SEMICN", $2));
     }
-    | Exp %prec RBRACE {  // 缺少分号的表达式语句（低优先级）
-        add_syntax_error(yylineno, "Missing \";\"");
+    | LVal ASSIGN Exp error {  // 通用的错误恢复：缺少分号
+        int err_line = yylineno;
+        add_syntax_error(err_line, "Missing \";\"");
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, $1);
+        add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
+        add_child($$, $3);
+    }
+    | LVal ASSIGN Exp {  // 缺少分号的错误恢复
+        int err_line = yylineno;
+        add_syntax_error(err_line, "Missing \";\"");
+        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        add_child($$, $1);
+        add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
+        add_child($$, $3);
     }
     | SEMICN {
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
@@ -352,6 +368,7 @@ Stmt:
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, $1);
     }
+    
     | IFTK LPARENT Cond RPARENT Stmt {
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, create_token_node(IFTK, "IFTK", $1));
@@ -717,24 +734,26 @@ void yyerror(const char* s) {
     // 禁用Bison的默认错误处理，避免重复报告
     // 我们已经在规则中手动处理了错误
 }
-
 void add_syntax_error(int line, const char *msg) {
-    // 防止重复报告相同错误
-    for (int i = 0; i < syntax_error_count; i++) {
-        if (syntax_error_list[i].line == line &&
-            strstr(syntax_error_list[i].message, msg) != NULL) {
-            return;  // 如果已经报告过相同的错误，直接跳过
-        }
-    }
     if (syntax_error_count < MAX_ERRORS) {
         char full_msg[100];
         snprintf(full_msg, sizeof(full_msg), "Error type B at Line %d: %s", line, msg);
+        
+        // 确保错误信息不重复
+        for (int i = 0; i < syntax_error_count; i++) {
+            if (syntax_error_list[i].line == line &&
+                strcmp(syntax_error_list[i].message, full_msg) == 0) {
+                return; // 如果相同的错误已经记录，直接跳过
+            }
+        }
+        
         syntax_error_list[syntax_error_count].line = line;
         strcpy(syntax_error_list[syntax_error_count].message, full_msg);
         syntax_error_count++;
         has_error = 1;
     }
 }
+
 
 
 int main(int argc, char* argv[]) {
@@ -761,7 +780,9 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     if (syntax_error_count > 0) {
+        printf("syntax errors:\n");
         for (int i = 0; i < syntax_error_count; i++) {
+
             fprintf(stderr, "%s\n", syntax_error_list[i].message);
         }
         return 0;
