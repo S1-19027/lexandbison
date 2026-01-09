@@ -399,6 +399,8 @@ Stmt:
         add_child($$, $1);
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
+        // 强制终止解析，避免后续错误
+        YYABORT;
     }
     ;
 
@@ -452,6 +454,8 @@ LVal:
         add_child($$, create_token_node(COMMA, "COMMA", $4));
         add_child($$, $5);
         add_child($$, create_token_node(RBRACKET, "RBRACKET", $6));
+        // 强制终止解析，避免后续错误
+        YYABORT;
     }
     ;
 
