@@ -592,15 +592,15 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    74,    74,    80,    84,    92,   101,   110,   119,   123,
-     127,   134,   144,   148,   155,   164,   171,   180,   184,   191,
-     201,   210,   216,   219,   238,   242,   250,   253,   257,   261,
-     268,   273,   283,   288,   295,   304,   308,   316,   320,   324,
-     333,   340,   350,   355,   362,   371,   375,   380,   388,   398,
-     406,   411,   416,   421,   430,   437,   444,   448,   455,   469,
-     475,   479,   486,   496,   500,   507,   515,   519,   523,   530,
-     534,   540,   546,   555,   559,   565,   574,   578,   584,   590,
-     596,   605,   609,   615,   624,   628,   637,   641,   650
+       0,    74,    74,    80,    84,    92,   101,   112,   121,   125,
+     129,   136,   146,   150,   157,   166,   173,   182,   186,   193,
+     203,   212,   218,   221,   240,   244,   252,   255,   259,   263,
+     270,   275,   285,   290,   297,   311,   315,   322,   326,   330,
+     339,   346,   356,   361,   368,   377,   381,   386,   394,   404,
+     412,   417,   422,   427,   436,   443,   450,   454,   461,   476,
+     482,   486,   493,   503,   507,   514,   522,   526,   530,   537,
+     541,   547,   553,   562,   566,   572,   581,   585,   591,   597,
+     603,   612,   616,   622,   631,   635,   644,   648,   657
 };
 #endif
 
@@ -1279,7 +1279,7 @@ yyreduce:
   case 3: /* DeclOrFuncDefList: DeclOrFuncDef  */
 #line 80 "parser.y"
                     {
-        (yyval.node) = create_ast_node(Node_CompUnit, "CompUnit", yylineno);
+        (yyval.node) = create_ast_node(Node_CompUnit, "CompUnit", 1);
         add_child((yyval.node), (yyvsp[0].node));
     }
 #line 1286 "parser.tab.c"
@@ -1311,19 +1311,21 @@ yyreduce:
   case 6: /* DeclOrFuncDef: INTTK ID LPARENT FuncFParamsOpt RPARENT Block  */
 #line 101 "parser.y"
                                                     {
-        (yyval.node) = create_ast_node(Node_FuncDef, "FuncDef", yylineno);
-        add_child((yyval.node), create_token_node(INTTK, "INTTK", (yyvsp[-5].str)));
-        add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-4].str)));
+        (yyval.node) = create_ast_node(Node_FuncDef, "FuncDef", 1);
+        ASTNode* func_type = create_ast_node(Node_FuncType, "FuncType", 1);
+        add_child(func_type, create_token_node(INTTK, "Type", "int"));
+        add_child((yyval.node), func_type);
+        add_child((yyval.node), create_token_node(ID, "Ident", (yyvsp[-4].str)));
         add_child((yyval.node), create_token_node(LPARENT, "LPARENT", (yyvsp[-3].str)));
          if ((yyvsp[-2].node)) add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(RPARENT, "RPARENT", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1323 "parser.tab.c"
+#line 1325 "parser.tab.c"
     break;
 
   case 7: /* DeclOrFuncDef: FLOATTK ID LPARENT FuncFParamsOpt RPARENT Block  */
-#line 110 "parser.y"
+#line 112 "parser.y"
                                                       {
         (yyval.node) = create_ast_node(Node_FuncDef, "FuncDef", yylineno);
         add_child((yyval.node), create_token_node(FLOATTK, "FLOATTK", (yyvsp[-5].str)));
@@ -1333,35 +1335,35 @@ yyreduce:
         add_child((yyval.node), create_token_node(RPARENT, "RPARENT", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1337 "parser.tab.c"
+#line 1339 "parser.tab.c"
     break;
 
   case 8: /* DeclOrFuncDef: Decl  */
-#line 119 "parser.y"
+#line 121 "parser.y"
            { (yyval.node) = (yyvsp[0].node); }
-#line 1343 "parser.tab.c"
+#line 1345 "parser.tab.c"
     break;
 
   case 9: /* Decl: ConstDecl  */
-#line 123 "parser.y"
+#line 125 "parser.y"
               {
-        (yyval.node) = create_ast_node(Node_Decl, "Decl", yylineno);
+        (yyval.node) = create_ast_node(Node_Decl, "Decl", 3);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1352 "parser.tab.c"
+#line 1354 "parser.tab.c"
     break;
 
   case 10: /* Decl: VarDecl  */
-#line 127 "parser.y"
+#line 129 "parser.y"
               {
-        (yyval.node) = create_ast_node(Node_Decl, "Decl", yylineno);
+        (yyval.node) = create_ast_node(Node_Decl, "Decl", 3);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1361 "parser.tab.c"
+#line 1363 "parser.tab.c"
     break;
 
   case 11: /* ConstDecl: CONSTTK BType ConstDef SEMICN  */
-#line 134 "parser.y"
+#line 136 "parser.y"
                                   {
         (yyval.node) = create_ast_node(Node_ConstDecl, "ConstDecl", yylineno);
         add_child((yyval.node), create_token_node(CONSTTK, "CONSTTK", (yyvsp[-3].str)));
@@ -1369,69 +1371,69 @@ yyreduce:
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1373 "parser.tab.c"
+#line 1375 "parser.tab.c"
     break;
 
   case 12: /* BType: INTTK  */
-#line 144 "parser.y"
+#line 146 "parser.y"
           {
         (yyval.node) = create_ast_node(Node_BType, "BType", yylineno);
-        add_child((yyval.node), create_token_node(INTTK, "INTTK", (yyvsp[0].str)));
+        add_child((yyval.node), create_token_node(INTTK, "Type", "int"));
     }
-#line 1382 "parser.tab.c"
+#line 1384 "parser.tab.c"
     break;
 
   case 13: /* BType: FLOATTK  */
-#line 148 "parser.y"
+#line 150 "parser.y"
               {
         (yyval.node) = create_ast_node(Node_BType, "BType", yylineno);
         add_child((yyval.node), create_token_node(FLOATTK, "FLOATTK", (yyvsp[0].str)));
     }
-#line 1391 "parser.tab.c"
+#line 1393 "parser.tab.c"
     break;
 
   case 14: /* ConstDef: ID ASSIGN ConstInitVal  */
-#line 155 "parser.y"
+#line 157 "parser.y"
                            {
         (yyval.node) = create_ast_node(Node_ConstDef, "ConstDef", yylineno);
         add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-2].str)));
         add_child((yyval.node), create_token_node(ASSIGN, "ASSIGN", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1402 "parser.tab.c"
+#line 1404 "parser.tab.c"
     break;
 
   case 15: /* ConstInitVal: ConstExp  */
-#line 164 "parser.y"
+#line 166 "parser.y"
              {
         (yyval.node) = create_ast_node(Node_ConstInitVal, "ConstInitVal", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1411 "parser.tab.c"
+#line 1413 "parser.tab.c"
     break;
 
   case 16: /* VarDecl: BType VarDef SEMICN  */
-#line 171 "parser.y"
+#line 173 "parser.y"
                         {
-        (yyval.node) = create_ast_node(Node_VarDecl, "VarDecl", yylineno);
+        (yyval.node) = create_ast_node(Node_VarDecl, "VarDecl", 3);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1422 "parser.tab.c"
+#line 1424 "parser.tab.c"
     break;
 
   case 17: /* VarDef: ID  */
-#line 180 "parser.y"
+#line 182 "parser.y"
        {
         (yyval.node) = create_ast_node(Node_VarDef, "VarDef", yylineno);
-        add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[0].str)));
+        add_child((yyval.node), create_token_node(ID, "Ident", (yyvsp[0].str)));
     }
-#line 1431 "parser.tab.c"
+#line 1433 "parser.tab.c"
     break;
 
   case 18: /* VarDef: ID LBRACKET ConstExp RBRACKET  */
-#line 184 "parser.y"
+#line 186 "parser.y"
                                     {
         (yyval.node) = create_ast_node(Node_VarDef, "VarDef", yylineno);
         add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-3].str)));
@@ -1439,11 +1441,11 @@ yyreduce:
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(RBRACKET, "RBRACKET", (yyvsp[0].str)));
     }
-#line 1443 "parser.tab.c"
+#line 1445 "parser.tab.c"
     break;
 
   case 19: /* VarDef: ID LBRACKET ConstExp RBRACKET LBRACKET ConstExp RBRACKET  */
-#line 191 "parser.y"
+#line 193 "parser.y"
                                                                {
         (yyval.node) = create_ast_node(Node_VarDef, "VarDef", yylineno);
         add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-6].str)));
@@ -1454,105 +1456,105 @@ yyreduce:
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(RBRACKET, "RBRACKET", (yyvsp[0].str)));
     }
-#line 1458 "parser.tab.c"
+#line 1460 "parser.tab.c"
     break;
 
   case 20: /* VarDef: ID ASSIGN InitVal  */
-#line 201 "parser.y"
+#line 203 "parser.y"
                         {
         (yyval.node) = create_ast_node(Node_VarDef, "VarDef", yylineno);
         add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-2].str)));
         add_child((yyval.node), create_token_node(ASSIGN, "ASSIGN", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1469 "parser.tab.c"
+#line 1471 "parser.tab.c"
     break;
 
   case 21: /* InitVal: Exp  */
-#line 210 "parser.y"
+#line 212 "parser.y"
         {
         (yyval.node) = create_ast_node(Node_InitVal, "InitVal", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1478 "parser.tab.c"
+#line 1480 "parser.tab.c"
     break;
 
   case 22: /* FuncFParamsOpt: %empty  */
-#line 216 "parser.y"
+#line 218 "parser.y"
                  {
         (yyval.node) = NULL;
     }
-#line 1486 "parser.tab.c"
+#line 1488 "parser.tab.c"
     break;
 
   case 23: /* FuncFParamsOpt: FuncFParams  */
-#line 219 "parser.y"
+#line 221 "parser.y"
                   {(yyval.node) = (yyvsp[0].node);}
-#line 1492 "parser.tab.c"
+#line 1494 "parser.tab.c"
     break;
 
   case 24: /* FuncFParams: FuncFParam  */
-#line 238 "parser.y"
+#line 240 "parser.y"
                {
         (yyval.node) = create_ast_node(Node_FuncFParams, "FuncFParams", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1501 "parser.tab.c"
+#line 1503 "parser.tab.c"
     break;
 
   case 25: /* FuncFParams: FuncFParams COMMA FuncFParam  */
-#line 242 "parser.y"
+#line 244 "parser.y"
                                  {
         (yyval.node) = (yyvsp[-2].node);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1510 "parser.tab.c"
+#line 1512 "parser.tab.c"
     break;
 
   case 26: /* FuncRParamsOpt: %empty  */
-#line 250 "parser.y"
+#line 252 "parser.y"
                  {
         (yyval.node) = NULL;
     }
-#line 1518 "parser.tab.c"
+#line 1520 "parser.tab.c"
     break;
 
   case 27: /* FuncRParamsOpt: FuncRParams  */
-#line 253 "parser.y"
+#line 255 "parser.y"
                   {(yyval.node) = (yyvsp[0].node);}
-#line 1524 "parser.tab.c"
+#line 1526 "parser.tab.c"
     break;
 
   case 28: /* FuncRParams: Exp  */
-#line 257 "parser.y"
+#line 259 "parser.y"
         {
         (yyval.node) = create_ast_node(Node_FuncRParams, "FuncRParams", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1533 "parser.tab.c"
+#line 1535 "parser.tab.c"
     break;
 
   case 29: /* FuncRParams: FuncRParams COMMA Exp  */
-#line 261 "parser.y"
+#line 263 "parser.y"
                           {
         (yyval.node) = (yyvsp[-2].node);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1542 "parser.tab.c"
+#line 1544 "parser.tab.c"
     break;
 
   case 30: /* FuncFParam: BType ID  */
-#line 268 "parser.y"
+#line 270 "parser.y"
              {
         (yyval.node) = create_ast_node(Node_FuncFParam, "FuncFParam", yylineno);
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(ID, "Ident", (yyvsp[0].str)));
     }
-#line 1552 "parser.tab.c"
+#line 1554 "parser.tab.c"
     break;
 
   case 31: /* FuncFParam: BType ID LBRACKET RBRACKET FuncFParamDims  */
-#line 273 "parser.y"
+#line 275 "parser.y"
                                               {
         (yyval.node) = create_ast_node(Node_FuncFParam, "FuncFParam", yylineno);
         add_child((yyval.node), (yyvsp[-4].node));
@@ -1561,102 +1563,106 @@ yyreduce:
         add_child((yyval.node), create_token_node(RBRACKET, "RBRACKET", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1565 "parser.tab.c"
+#line 1567 "parser.tab.c"
     break;
 
   case 32: /* FuncFParamDims: LBRACKET RBRACKET  */
-#line 283 "parser.y"
+#line 285 "parser.y"
                       {
         (yyval.node) = create_ast_node(Node_FuncFParamDims, "FuncFParamDims", yylineno);
         add_child((yyval.node), create_token_node(LBRACKET, "LBRACKET", (yyvsp[-1].str)));
         add_child((yyval.node), create_token_node(RBRACKET, "RBRACKET", (yyvsp[0].str)));
     }
-#line 1575 "parser.tab.c"
+#line 1577 "parser.tab.c"
     break;
 
   case 33: /* FuncFParamDims: FuncFParamDims LBRACKET RBRACKET  */
-#line 288 "parser.y"
+#line 290 "parser.y"
                                        {
         (yyval.node) = (yyvsp[-2].node);
         add_child((yyval.node), create_token_node(LBRACKET, "LBRACKET", (yyvsp[-1].str)));
         add_child((yyval.node), create_token_node(RBRACKET, "RBRACKET", (yyvsp[0].str)));
     }
-#line 1585 "parser.tab.c"
+#line 1587 "parser.tab.c"
     break;
 
   case 34: /* Block: LBRACE BlockItem_list RBRACE  */
-#line 295 "parser.y"
+#line 297 "parser.y"
                                  {
-        (yyval.node) = create_ast_node(Node_Block, "Block", yylineno);
+        (yyval.node) = create_ast_node(Node_Block, "Block", 2);
         add_child((yyval.node), create_token_node(LBRACE, "LBRACE", (yyvsp[-2].str)));
-        add_child((yyval.node), (yyvsp[-1].node));
+        // 直接将BlockItem_list的子节点添加到Block中
+        if ((yyvsp[-1].node) && (yyvsp[-1].node)->child_count > 0) {
+            for (int i = 0; i < (yyvsp[-1].node)->child_count; i++) {
+                add_child((yyval.node), (yyvsp[-1].node)->children[i]);
+            }
+        }
         add_child((yyval.node), create_token_node(RBRACE, "RBRACE", (yyvsp[0].str)));
     }
-#line 1596 "parser.tab.c"
+#line 1603 "parser.tab.c"
     break;
 
   case 35: /* BlockItem_list: %empty  */
-#line 304 "parser.y"
+#line 311 "parser.y"
                 {
         (yyval.node) = create_ast_node(Node_BlockItem, "BlockItem_list", yylineno);
         (yyval.node)->is_epsilon = 1;
     }
-#line 1605 "parser.tab.c"
+#line 1612 "parser.tab.c"
     break;
 
   case 36: /* BlockItem_list: BlockItem_list BlockItem  */
-#line 308 "parser.y"
+#line 315 "parser.y"
                                {
-        (yyval.node) = create_ast_node(Node_BlockItem, "BlockItem_list", yylineno);
-        add_child((yyval.node), (yyvsp[-1].node));
+        (yyval.node) = (yyvsp[-1].node);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1615 "parser.tab.c"
+#line 1621 "parser.tab.c"
     break;
 
   case 37: /* BlockItem: Decl  */
-#line 316 "parser.y"
+#line 322 "parser.y"
          {
-        (yyval.node) = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
+        (yyval.node) = create_ast_node(Node_BlockItem, "BlockItem", 3);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1624 "parser.tab.c"
+#line 1630 "parser.tab.c"
     break;
 
   case 38: /* BlockItem: Stmt  */
-#line 320 "parser.y"
+#line 326 "parser.y"
            {
-        (yyval.node) = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
+        (yyval.node) = create_ast_node(Node_BlockItem, "BlockItem", 4);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1633 "parser.tab.c"
+#line 1639 "parser.tab.c"
     break;
 
   case 39: /* BlockItem: error SEMICN  */
-#line 324 "parser.y"
+#line 330 "parser.y"
                   {  // 错误恢复：跳过错误的语句直到分号
         int err_line = yylineno;
         add_syntax_error(err_line, "Missing \";\"");
         (yyval.node) = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
         yyerrok;  // 恢复解析状态
     }
-#line 1644 "parser.tab.c"
+#line 1650 "parser.tab.c"
     break;
 
   case 40: /* Stmt: LVal ASSIGN Exp SEMICN  */
-#line 333 "parser.y"
+#line 339 "parser.y"
                            {
-        (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        (yyval.node) = create_ast_node(Node_Stmt, "Stmt", 4);
         add_child((yyval.node), (yyvsp[-3].node));
         add_child((yyval.node), create_token_node(ASSIGN, "ASSIGN", (yyvsp[-2].str)));
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1656 "parser.tab.c"
+#line 1662 "parser.tab.c"
     break;
 
   case 41: /* Stmt: LVal ASSIGN Exp ELSETK  */
-#line 340 "parser.y"
+#line 346 "parser.y"
                              {  // 缺少分号，后面跟 else
         int err_line = yylineno;
         add_syntax_error(err_line, "Missing \";\"");
@@ -1664,23 +1670,23 @@ yyreduce:
         add_child((yyval.node), (yyvsp[-3].node));
         add_child((yyval.node), create_token_node(ASSIGN, "ASSIGN", (yyvsp[-2].str)));
         add_child((yyval.node), (yyvsp[-1].node));
-        
+        yyerrok;  // 恢复错误状态，继续解析
     }
-#line 1670 "parser.tab.c"
+#line 1676 "parser.tab.c"
     break;
 
   case 42: /* Stmt: Exp SEMICN  */
-#line 350 "parser.y"
+#line 356 "parser.y"
                  {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1680 "parser.tab.c"
+#line 1686 "parser.tab.c"
     break;
 
   case 43: /* Stmt: Exp error  */
-#line 355 "parser.y"
+#line 361 "parser.y"
                 {  // 通用的错误恢复：表达式语句缺少分号
         int err_line = yylineno;
         add_syntax_error(err_line, "Missing \";\"");
@@ -1688,11 +1694,11 @@ yyreduce:
         add_child((yyval.node), (yyvsp[-1].node));
         yyerrok;  // 恢复解析状态
     }
-#line 1692 "parser.tab.c"
+#line 1698 "parser.tab.c"
     break;
 
   case 44: /* Stmt: LVal ASSIGN Exp error  */
-#line 362 "parser.y"
+#line 368 "parser.y"
                             {  // 通用的错误恢复：缺少分号
         int err_line = yylineno;
         add_syntax_error(err_line, "Missing \";\"");
@@ -1702,29 +1708,29 @@ yyreduce:
         add_child((yyval.node), (yyvsp[-1].node));
         yyerrok;  // 恢复错误状态，继续解析
     }
-#line 1706 "parser.tab.c"
+#line 1712 "parser.tab.c"
     break;
 
   case 45: /* Stmt: SEMICN  */
-#line 371 "parser.y"
+#line 377 "parser.y"
              {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1715 "parser.tab.c"
+#line 1721 "parser.tab.c"
     break;
 
   case 46: /* Stmt: Block  */
-#line 375 "parser.y"
+#line 381 "parser.y"
             {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1724 "parser.tab.c"
+#line 1730 "parser.tab.c"
     break;
 
   case 47: /* Stmt: IFTK LPARENT Cond RPARENT Stmt  */
-#line 380 "parser.y"
+#line 386 "parser.y"
                                      {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(IFTK, "IFTK", (yyvsp[-4].str)));
@@ -1733,11 +1739,11 @@ yyreduce:
         add_child((yyval.node), create_token_node(RPARENT, "RPARENT", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1737 "parser.tab.c"
+#line 1743 "parser.tab.c"
     break;
 
   case 48: /* Stmt: IFTK LPARENT Cond RPARENT Stmt ELSETK Stmt  */
-#line 388 "parser.y"
+#line 394 "parser.y"
                                                  {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(IFTK, "IFTK", (yyvsp[-6].str)));
@@ -1748,11 +1754,11 @@ yyreduce:
         add_child((yyval.node), create_token_node(ELSETK, "ELSETK", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1752 "parser.tab.c"
+#line 1758 "parser.tab.c"
     break;
 
   case 49: /* Stmt: WHILETK LPARENT Cond RPARENT Stmt  */
-#line 398 "parser.y"
+#line 404 "parser.y"
                                         {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(WHILETK, "WHILETK", (yyvsp[-4].str)));
@@ -1761,79 +1767,79 @@ yyreduce:
         add_child((yyval.node), create_token_node(RPARENT, "RPARENT", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1765 "parser.tab.c"
+#line 1771 "parser.tab.c"
     break;
 
   case 50: /* Stmt: BREAKTK SEMICN  */
-#line 406 "parser.y"
+#line 412 "parser.y"
                      {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(BREAKTK, "BREAKTK", (yyvsp[-1].str)));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1775 "parser.tab.c"
+#line 1781 "parser.tab.c"
     break;
 
   case 51: /* Stmt: CONTINUETK SEMICN  */
-#line 411 "parser.y"
+#line 417 "parser.y"
                         {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(CONTINUETK, "CONTINUETK", (yyvsp[-1].str)));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1785 "parser.tab.c"
+#line 1791 "parser.tab.c"
     break;
 
   case 52: /* Stmt: RETURNTK SEMICN  */
-#line 416 "parser.y"
+#line 422 "parser.y"
                       {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(RETURNTK, "RETURNTK", (yyvsp[-1].str)));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1795 "parser.tab.c"
+#line 1801 "parser.tab.c"
     break;
 
   case 53: /* Stmt: RETURNTK Exp SEMICN  */
-#line 421 "parser.y"
+#line 427 "parser.y"
                           {
         (yyval.node) = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child((yyval.node), create_token_node(RETURNTK, "RETURNTK", (yyvsp[-2].str)));
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(SEMICN, "SEMICN", (yyvsp[0].str)));
     }
-#line 1806 "parser.tab.c"
+#line 1812 "parser.tab.c"
     break;
 
   case 54: /* Exp: AddExp  */
-#line 430 "parser.y"
+#line 436 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_Exp, "Exp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1815 "parser.tab.c"
+#line 1821 "parser.tab.c"
     break;
 
   case 55: /* Cond: LOrExp  */
-#line 437 "parser.y"
+#line 443 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_Cond, "Cond", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1824 "parser.tab.c"
+#line 1830 "parser.tab.c"
     break;
 
   case 56: /* LVal: ID  */
-#line 444 "parser.y"
+#line 450 "parser.y"
        {
         (yyval.node) = create_ast_node(Node_LVal, "LVal", yylineno);
-        add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[0].str)));
+        add_child((yyval.node), create_token_node(ID, "Ident", (yyvsp[0].str)));
     }
-#line 1833 "parser.tab.c"
+#line 1839 "parser.tab.c"
     break;
 
   case 57: /* LVal: ID LBRACKET Exp RBRACKET  */
-#line 448 "parser.y"
+#line 454 "parser.y"
                                {
         (yyval.node) = create_ast_node(Node_LVal, "LVal", yylineno);
         add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-3].str)));
@@ -1841,13 +1847,14 @@ yyreduce:
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(RBRACKET, "RBRACKET", (yyvsp[0].str)));
     }
-#line 1845 "parser.tab.c"
+#line 1851 "parser.tab.c"
     break;
 
   case 58: /* LVal: ID LBRACKET Exp COMMA Exp RBRACKET  */
-#line 455 "parser.y"
+#line 461 "parser.y"
                                          {  // 错误：a[5,3] 应该是 a[5][3]
-        add_syntax_error(yylineno, "Missing \"]\"");
+    int err_line = yylineno;  // 这里依然用当前行号
+        add_syntax_error(err_line, "Missing \"]\"");
         (yyval.node) = create_ast_node(Node_LVal, "LVal", yylineno);
         add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-5].str)));
         add_child((yyval.node), create_token_node(LBRACKET, "LBRACKET", (yyvsp[-4].str)));
@@ -1857,60 +1864,60 @@ yyreduce:
         add_child((yyval.node), create_token_node(RBRACKET, "RBRACKET", (yyvsp[0].str)));
         yyerrok;  // 恢复错误状态，继续解析
     }
-#line 1861 "parser.tab.c"
+#line 1868 "parser.tab.c"
     break;
 
   case 59: /* PrimaryExp: LPARENT Exp RPARENT  */
-#line 469 "parser.y"
+#line 476 "parser.y"
                         {
         (yyval.node) = create_ast_node(Node_PrimaryExp, "PrimaryExp", yylineno);
         add_child((yyval.node), create_token_node(LPARENT, "LPARENT", (yyvsp[-2].str)));
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(RPARENT, "RPARENT", (yyvsp[0].str)));
     }
-#line 1872 "parser.tab.c"
+#line 1879 "parser.tab.c"
     break;
 
   case 60: /* PrimaryExp: LVal  */
-#line 475 "parser.y"
+#line 482 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_PrimaryExp, "PrimaryExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1881 "parser.tab.c"
+#line 1888 "parser.tab.c"
     break;
 
   case 61: /* PrimaryExp: Number  */
-#line 479 "parser.y"
+#line 486 "parser.y"
              {
         (yyval.node) = create_ast_node(Node_PrimaryExp, "PrimaryExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1890 "parser.tab.c"
+#line 1897 "parser.tab.c"
     break;
 
   case 62: /* Number: INTCON  */
-#line 486 "parser.y"
+#line 493 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_Number, "Number", yylineno);
                 char buf[32];
         sprintf(buf, "%d", (yyvsp[0].intval));   // ⭐ int → string
         add_child((yyval.node), create_token_node(INTCON, "INTCON", buf));
     }
-#line 1901 "parser.tab.c"
+#line 1908 "parser.tab.c"
     break;
 
   case 63: /* UnaryExp: PrimaryExp  */
-#line 496 "parser.y"
+#line 503 "parser.y"
                {
         (yyval.node) = create_ast_node(Node_UnaryExp, "UnaryExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1910 "parser.tab.c"
+#line 1917 "parser.tab.c"
     break;
 
   case 64: /* UnaryExp: ID LPARENT FuncRParamsOpt RPARENT  */
-#line 500 "parser.y"
+#line 507 "parser.y"
                                         {
         (yyval.node) = create_ast_node(Node_UnaryExp, "UnaryExp", yylineno);
         add_child((yyval.node), create_token_node(ID, "ID", (yyvsp[-3].str)));
@@ -1918,254 +1925,254 @@ yyreduce:
         if ((yyvsp[-1].node)) add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), create_token_node(RPARENT, "RPARENT", (yyvsp[0].str)));
     }
-#line 1922 "parser.tab.c"
+#line 1929 "parser.tab.c"
     break;
 
   case 65: /* UnaryExp: UnaryOp UnaryExp  */
-#line 507 "parser.y"
+#line 514 "parser.y"
                        {
         (yyval.node) = create_ast_node(Node_UnaryExp, "UnaryExp", yylineno);
         add_child((yyval.node), (yyvsp[-1].node));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1932 "parser.tab.c"
+#line 1939 "parser.tab.c"
     break;
 
   case 66: /* UnaryOp: PLUS  */
-#line 515 "parser.y"
+#line 522 "parser.y"
          {
         (yyval.node) = create_ast_node(Node_UnaryOp, "UnaryOp", yylineno);
         add_child((yyval.node), create_token_node(PLUS, "PLUS", (yyvsp[0].str)));
     }
-#line 1941 "parser.tab.c"
+#line 1948 "parser.tab.c"
     break;
 
   case 67: /* UnaryOp: MINUS  */
-#line 519 "parser.y"
+#line 526 "parser.y"
             {
         (yyval.node) = create_ast_node(Node_UnaryOp, "UnaryOp", yylineno);
         add_child((yyval.node), create_token_node(MINUS, "MINUS", (yyvsp[0].str)));
     }
-#line 1950 "parser.tab.c"
+#line 1957 "parser.tab.c"
     break;
 
   case 68: /* UnaryOp: NOT  */
-#line 523 "parser.y"
+#line 530 "parser.y"
           {
         (yyval.node) = create_ast_node(Node_UnaryOp, "UnaryOp", yylineno);
         add_child((yyval.node), create_token_node(NOT, "NOT", (yyvsp[0].str)));
     }
-#line 1959 "parser.tab.c"
+#line 1966 "parser.tab.c"
     break;
 
   case 69: /* MulExp: UnaryExp  */
-#line 530 "parser.y"
+#line 537 "parser.y"
              {
         (yyval.node) = create_ast_node(Node_MulExp, "MulExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1968 "parser.tab.c"
+#line 1975 "parser.tab.c"
     break;
 
   case 70: /* MulExp: MulExp MUL UnaryExp  */
-#line 534 "parser.y"
+#line 541 "parser.y"
                           {
         (yyval.node) = create_ast_node(Node_MulExp, "MulExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(MUL, "MUL", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1979 "parser.tab.c"
+#line 1986 "parser.tab.c"
     break;
 
   case 71: /* MulExp: MulExp DIV UnaryExp  */
-#line 540 "parser.y"
+#line 547 "parser.y"
                           {
         (yyval.node) = create_ast_node(Node_MulExp, "MulExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(DIV, "DIV", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 1990 "parser.tab.c"
+#line 1997 "parser.tab.c"
     break;
 
   case 72: /* MulExp: MulExp MOD UnaryExp  */
-#line 546 "parser.y"
+#line 553 "parser.y"
                           {
         (yyval.node) = create_ast_node(Node_MulExp, "MulExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(MOD, "MOD", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2001 "parser.tab.c"
+#line 2008 "parser.tab.c"
     break;
 
   case 73: /* AddExp: MulExp  */
-#line 555 "parser.y"
+#line 562 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_AddExp, "AddExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2010 "parser.tab.c"
+#line 2017 "parser.tab.c"
     break;
 
   case 74: /* AddExp: AddExp PLUS MulExp  */
-#line 559 "parser.y"
+#line 566 "parser.y"
                          {
         (yyval.node) = create_ast_node(Node_AddExp, "AddExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(PLUS, "PLUS", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2021 "parser.tab.c"
+#line 2028 "parser.tab.c"
     break;
 
   case 75: /* AddExp: AddExp MINUS MulExp  */
-#line 565 "parser.y"
+#line 572 "parser.y"
                           {
         (yyval.node) = create_ast_node(Node_AddExp, "AddExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(MINUS, "MINUS", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2032 "parser.tab.c"
+#line 2039 "parser.tab.c"
     break;
 
   case 76: /* RelExp: AddExp  */
-#line 574 "parser.y"
+#line 581 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_RelExp, "RelExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2041 "parser.tab.c"
+#line 2048 "parser.tab.c"
     break;
 
   case 77: /* RelExp: RelExp LT AddExp  */
-#line 578 "parser.y"
+#line 585 "parser.y"
                        {
         (yyval.node) = create_ast_node(Node_RelExp, "RelExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(LT, "LT", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2052 "parser.tab.c"
+#line 2059 "parser.tab.c"
     break;
 
   case 78: /* RelExp: RelExp GT AddExp  */
-#line 584 "parser.y"
+#line 591 "parser.y"
                        {
         (yyval.node) = create_ast_node(Node_RelExp, "RelExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(GT, "GT", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2063 "parser.tab.c"
+#line 2070 "parser.tab.c"
     break;
 
   case 79: /* RelExp: RelExp LEQ AddExp  */
-#line 590 "parser.y"
+#line 597 "parser.y"
                         {
         (yyval.node) = create_ast_node(Node_RelExp, "RelExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(LEQ, "LEQ", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2074 "parser.tab.c"
+#line 2081 "parser.tab.c"
     break;
 
   case 80: /* RelExp: RelExp GEQ AddExp  */
-#line 596 "parser.y"
+#line 603 "parser.y"
                         {
         (yyval.node) = create_ast_node(Node_RelExp, "RelExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(GEQ, "GEQ", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2085 "parser.tab.c"
+#line 2092 "parser.tab.c"
     break;
 
   case 81: /* EqExp: RelExp  */
-#line 605 "parser.y"
+#line 612 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_EqExp, "EqExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2094 "parser.tab.c"
+#line 2101 "parser.tab.c"
     break;
 
   case 82: /* EqExp: EqExp EQ RelExp  */
-#line 609 "parser.y"
+#line 616 "parser.y"
                       {
         (yyval.node) = create_ast_node(Node_EqExp, "EqExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(EQ, "EQ", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2105 "parser.tab.c"
+#line 2112 "parser.tab.c"
     break;
 
   case 83: /* EqExp: EqExp NEQ RelExp  */
-#line 615 "parser.y"
+#line 622 "parser.y"
                        {
         (yyval.node) = create_ast_node(Node_EqExp, "EqExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(NEQ, "NEQ", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2116 "parser.tab.c"
+#line 2123 "parser.tab.c"
     break;
 
   case 84: /* LAndExp: EqExp  */
-#line 624 "parser.y"
+#line 631 "parser.y"
           {
         (yyval.node) = create_ast_node(Node_LAndExp, "LAndExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2125 "parser.tab.c"
+#line 2132 "parser.tab.c"
     break;
 
   case 85: /* LAndExp: LAndExp AND EqExp  */
-#line 628 "parser.y"
+#line 635 "parser.y"
                         {
         (yyval.node) = create_ast_node(Node_LAndExp, "LAndExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(AND, "AND", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2136 "parser.tab.c"
+#line 2143 "parser.tab.c"
     break;
 
   case 86: /* LOrExp: LAndExp  */
-#line 637 "parser.y"
+#line 644 "parser.y"
             {
         (yyval.node) = create_ast_node(Node_LOrExp, "LOrExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2145 "parser.tab.c"
+#line 2152 "parser.tab.c"
     break;
 
   case 87: /* LOrExp: LOrExp OR LAndExp  */
-#line 641 "parser.y"
+#line 648 "parser.y"
                         {
         (yyval.node) = create_ast_node(Node_LOrExp, "LOrExp", yylineno);
         add_child((yyval.node), (yyvsp[-2].node));
         add_child((yyval.node), create_token_node(OR, "OR", (yyvsp[-1].str)));
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2156 "parser.tab.c"
+#line 2163 "parser.tab.c"
     break;
 
   case 88: /* ConstExp: AddExp  */
-#line 650 "parser.y"
+#line 657 "parser.y"
            {
         (yyval.node) = create_ast_node(Node_ConstExp, "ConstExp", yylineno);
         add_child((yyval.node), (yyvsp[0].node));
     }
-#line 2165 "parser.tab.c"
+#line 2172 "parser.tab.c"
     break;
 
 
-#line 2169 "parser.tab.c"
+#line 2176 "parser.tab.c"
 
       default: break;
     }
@@ -2358,7 +2365,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 656 "parser.y"
+#line 663 "parser.y"
 
 
 //C代码部分
@@ -2412,7 +2419,7 @@ void print_ast(ASTNode* node, int depth) {
     
     // 缩进
     for (int i = 0; i < depth; i++) {
-        printf("  ");
+        printf(" ");
     }
     
     if (node->type == Node_Token) {
@@ -2426,6 +2433,8 @@ void print_ast(ASTNode* node, int depth) {
             printf(": %s", node->value);
         } else if (node->token_type == INTCON) {
             printf(": %s", node->value);
+        } else if (node->token_type == PLUS) {
+            printf(":+");
         }
         printf("\n");
     } else {
@@ -2506,3 +2515,4 @@ int main(int argc, char* argv[]) {
   
     return 0;
 }
+

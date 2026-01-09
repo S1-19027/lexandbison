@@ -78,7 +78,7 @@ CompUnit
 
 DeclOrFuncDefList
     : DeclOrFuncDef {
-        $$ = create_ast_node(Node_CompUnit, "CompUnit", yylineno);
+        $$ = create_ast_node(Node_CompUnit, "CompUnit", 1);
         add_child($$, $1);
     }
     | DeclOrFuncDefList DeclOrFuncDef {
@@ -99,9 +99,11 @@ DeclOrFuncDef
         add_child($$, $6);
     }
     | INTTK ID LPARENT FuncFParamsOpt RPARENT Block {
-        $$ = create_ast_node(Node_FuncDef, "FuncDef", yylineno);
-        add_child($$, create_token_node(INTTK, "INTTK", $1));
-        add_child($$, create_token_node(ID, "ID", $2));
+        $$ = create_ast_node(Node_FuncDef, "FuncDef", 1);
+        ASTNode* func_type = create_ast_node(Node_FuncType, "FuncType", 1);
+        add_child(func_type, create_token_node(INTTK, "Type", "int"));
+        add_child($$, func_type);
+        add_child($$, create_token_node(ID, "Ident", $2));
         add_child($$, create_token_node(LPARENT, "LPARENT", $3));
          if ($4) add_child($$, $4);
         add_child($$, create_token_node(RPARENT, "RPARENT", $5));
@@ -121,11 +123,11 @@ DeclOrFuncDef
 
 Decl:
     ConstDecl {
-        $$ = create_ast_node(Node_Decl, "Decl", yylineno);
+        $$ = create_ast_node(Node_Decl, "Decl", 3);
         add_child($$, $1);
     }
     | VarDecl {
-        $$ = create_ast_node(Node_Decl, "Decl", yylineno);
+        $$ = create_ast_node(Node_Decl, "Decl", 3);
         add_child($$, $1);
     }
     ;
@@ -143,7 +145,7 @@ ConstDecl:
 BType:
     INTTK {
         $$ = create_ast_node(Node_BType, "BType", yylineno);
-        add_child($$, create_token_node(INTTK, "INTTK", $1));
+        add_child($$, create_token_node(INTTK, "Type", "int"));
     }
     | FLOATTK {
         $$ = create_ast_node(Node_BType, "BType", yylineno);
@@ -169,7 +171,7 @@ ConstInitVal:
 
 VarDecl:
     BType VarDef SEMICN {
-        $$ = create_ast_node(Node_VarDecl, "VarDecl", yylineno);
+        $$ = create_ast_node(Node_VarDecl, "VarDecl", 3);
         add_child($$, $1);
         add_child($$, $2);
         add_child($$, create_token_node(SEMICN, "SEMICN", $3));
@@ -179,7 +181,7 @@ VarDecl:
 VarDef:
     ID {
         $$ = create_ast_node(Node_VarDef, "VarDef", yylineno);
-        add_child($$, create_token_node(ID, "ID", $1));
+        add_child($$, create_token_node(ID, "Ident", $1));
     }
     | ID LBRACKET ConstExp RBRACKET {
         $$ = create_ast_node(Node_VarDef, "VarDef", yylineno);
@@ -293,9 +295,14 @@ FuncFParamDims:
     ;
 Block:
     LBRACE BlockItem_list RBRACE {
-        $$ = create_ast_node(Node_Block, "Block", yylineno);
+        $$ = create_ast_node(Node_Block, "Block", 2);
         add_child($$, create_token_node(LBRACE, "LBRACE", $1));
-        add_child($$, $2);
+        // 直接将BlockItem_list的子节点添加到Block中
+        if ($2 && $2->child_count > 0) {
+            for (int i = 0; i < $2->child_count; i++) {
+                add_child($$, $2->children[i]);
+            }
+        }
         add_child($$, create_token_node(RBRACE, "RBRACE", $3));
     }
     ;
@@ -306,19 +313,18 @@ BlockItem_list:
         $$->is_epsilon = 1;
     }
     | BlockItem_list BlockItem {
-        $$ = create_ast_node(Node_BlockItem, "BlockItem_list", yylineno);
-        add_child($$, $1);
+        $$ = $1;
         add_child($$, $2);
     }
     ;
 
 BlockItem:
     Decl {
-        $$ = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
+        $$ = create_ast_node(Node_BlockItem, "BlockItem", 3);
         add_child($$, $1);
     }
     | Stmt {
-        $$ = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
+        $$ = create_ast_node(Node_BlockItem, "BlockItem", 4);
         add_child($$, $1);
     }
     |error SEMICN {  // 错误恢复：跳过错误的语句直到分号
@@ -331,7 +337,7 @@ BlockItem:
 
 Stmt:
     LVal ASSIGN Exp SEMICN {
-        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        $$ = create_ast_node(Node_Stmt, "Stmt", 4);
         add_child($$, $1);
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
@@ -344,7 +350,7 @@ Stmt:
         add_child($$, $1);
         add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
-        
+        yyerrok;  // 恢复错误状态，继续解析
     }
 
     | Exp SEMICN {
@@ -443,7 +449,7 @@ Cond:
 LVal:
     ID {
         $$ = create_ast_node(Node_LVal, "LVal", yylineno);
-        add_child($$, create_token_node(ID, "ID", $1));
+        add_child($$, create_token_node(ID, "Ident", $1));
     }
     | ID LBRACKET Exp RBRACKET {
         $$ = create_ast_node(Node_LVal, "LVal", yylineno);
@@ -453,7 +459,8 @@ LVal:
         add_child($$, create_token_node(RBRACKET, "RBRACKET", $4));
     }
     | ID LBRACKET Exp COMMA Exp RBRACKET {  // 错误：a[5,3] 应该是 a[5][3]
-        add_syntax_error(yylineno, "Missing \"]\"");
+    int err_line = yylineno;  // 这里依然用当前行号
+        add_syntax_error(err_line, "Missing \"]\"");
         $$ = create_ast_node(Node_LVal, "LVal", yylineno);
         add_child($$, create_token_node(ID, "ID", $1));
         add_child($$, create_token_node(LBRACKET, "LBRACKET", $2));
@@ -706,7 +713,7 @@ void print_ast(ASTNode* node, int depth) {
     
     // 缩进
     for (int i = 0; i < depth; i++) {
-        printf("  ");
+        printf(" ");
     }
     
     if (node->type == Node_Token) {
@@ -720,6 +727,8 @@ void print_ast(ASTNode* node, int depth) {
             printf(": %s", node->value);
         } else if (node->token_type == INTCON) {
             printf(": %s", node->value);
+        } else if (node->token_type == PLUS) {
+            printf(":+");
         }
         printf("\n");
     } else {
@@ -788,7 +797,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     if (syntax_error_count > 0) {
-        printf("syntax errors:\n");
+       // printf("syntax errors:\n");
         for (int i = 0; i < syntax_error_count; i++) {
 
             fprintf(stderr, "%s\n", syntax_error_list[i].message);
@@ -800,3 +809,4 @@ int main(int argc, char* argv[]) {
   
     return 0;
 }
+
