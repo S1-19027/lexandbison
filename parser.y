@@ -13,6 +13,8 @@
 extern FILE *yyin;
 extern int yylineno;
 extern Error error_list[];
+extern int yyaccept;
+extern int yychar;  // 添加这个声明，用于错误恢复
 extern int error_count;
 int has_error = 0;
 SyntaxError syntax_error_list[MAX_ERRORS];  // 语法错误数组
@@ -319,6 +321,12 @@ BlockItem:
         $$ = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
         add_child($$, $1);
     }
+    |error SEMICN {  // 错误恢复：跳过错误的语句直到分号
+        int err_line = yylineno;
+        add_syntax_error(err_line, "Missing \";\"");
+        $$ = create_ast_node(Node_BlockItem, "BlockItem", yylineno);
+        yyerrok;  // 恢复解析状态
+    }
     ;
 
 Stmt:
@@ -344,21 +352,21 @@ Stmt:
         add_child($$, $1);
         add_child($$, create_token_node(SEMICN, "SEMICN", $2));
     }
+    | Exp error {  // 通用的错误恢复：表达式语句缺少分号
+        int err_line = yylineno;
+        add_syntax_error(err_line, "Missing \";\"");
+        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
+        add_child($$, $1);
+        yyerrok;  // 恢复解析状态
+    }
     | LVal ASSIGN Exp error {  // 通用的错误恢复：缺少分号
         int err_line = yylineno;
         add_syntax_error(err_line, "Missing \";\"");
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
         add_child($$, $1);
-        add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
+        add_child($$,create_token_node(ASSIGN, "ASSIGN", $2));
         add_child($$, $3);
-    }
-    | LVal ASSIGN Exp {  // 缺少分号的错误恢复
-        int err_line = yylineno;
-        add_syntax_error(err_line, "Missing \";\"");
-        $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
-        add_child($$, $1);
-        add_child($$, create_token_node(ASSIGN, "ASSIGN", $2));
-        add_child($$, $3);
+        yyerrok;  // 恢复错误状态，继续解析
     }
     | SEMICN {
         $$ = create_ast_node(Node_Stmt, "Stmt", yylineno);
@@ -453,6 +461,7 @@ LVal:
         add_child($$, create_token_node(COMMA, "COMMA", $4));
         add_child($$, $5);
         add_child($$, create_token_node(RBRACKET, "RBRACKET", $6));
+        yyerrok;  // 恢复错误状态，继续解析
     }
     ;
 
@@ -753,7 +762,6 @@ void add_syntax_error(int line, const char *msg) {
         has_error = 1;
     }
 }
-
 
 
 int main(int argc, char* argv[]) {
