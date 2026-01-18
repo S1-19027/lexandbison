@@ -1,0 +1,21 @@
+// 测试7: 嵌套的if和while
+int main() {
+    int i = 0;
+    int j;
+    int sum = 0;
+    
+    while (i < 5) {
+        j = 0;
+        while (j < 3) {
+            if (i > j) {
+                sum = sum + i - j;
+            } else {
+                sum = sum + j - i;
+            }
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+    
+    return sum;
+}

@@ -6,6 +6,8 @@
 #include "ast.h"
 #include "parser.tab.h"
 #include "semantic.h"
+#include "irgen.h"
+#include "codegen.h"
 #define MAX_ERRORS 100
 
 //语法树结构
@@ -856,6 +858,33 @@ int main(int argc, char* argv[]) {
         // 输出语义错误
         if (semantic_error_count > 0) {
             print_semantic_errors();
+        } else {
+            // 如果没有语义错误，则生成中间代码
+            printf("\n语义分析通过，开始生成中间代码...\n");
+            generate_ir(root);
+            print_ir_code();
+            
+            // 生成RISC-V汇编代码
+            printf("\n开始生成RISC-V汇编代码...\n");
+            
+            // 生成输出文件名
+            char output_filename[256];
+            strncpy(output_filename, argv[1], sizeof(output_filename) - 3);
+            char *dot = strrchr(output_filename, '.');
+            if (dot) {
+                strcpy(dot, ".s");
+            } else {
+                strcat(output_filename, ".s");
+            }
+            
+            FILE *asm_file = fopen(output_filename, "w");
+            if (asm_file) {
+                generate_riscv(ir_code_head, asm_file);
+                fclose(asm_file);
+                printf("RISC-V汇编代码已生成: %s\n", output_filename);
+            } else {
+                fprintf(stderr, "无法创建输出文件: %s\n", output_filename);
+            }
         }
     }
 

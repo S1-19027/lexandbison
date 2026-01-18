@@ -1,0 +1,14 @@
+// 测试9: 一元运算符
+int main() {
+    int a = 5;
+    int b;
+    
+    b = -a;
+    b = +a;
+    
+    if (!0) {
+        b = 1;
+    }
+    
+    return b;
+}

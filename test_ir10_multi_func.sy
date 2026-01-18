@@ -1,0 +1,18 @@
+// 测试10: 多个函数和函数调用链
+int multiply(int a, int b) {
+    return a * b;
+}
+
+int calculate(int x, int y) {
+    int result;
+    result = multiply(x, y) + multiply(y, x);
+    return result;
+}
+
+int main() {
+    int a = 3;
+    int b = 4;
+    int c;
+    c = calculate(a, b);
+    return c;
+}

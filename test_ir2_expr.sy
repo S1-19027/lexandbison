@@ -1,0 +1,11 @@
+// 测试2: 复杂表达式计算
+int main() {
+    int a = 5;
+    int b = 3;
+    int c = 2;
+    int result;
+    result = a * b + c;
+    result = (a + b) * c - a / b;
+    result = a % b;
+    return result;
+}

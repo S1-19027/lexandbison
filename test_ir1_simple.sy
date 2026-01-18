@@ -1,0 +1,8 @@
+// 测试1: 简单的变量声明、赋值和算术运算
+int main() {
+    int a = 10;
+    int b = 20;
+    int c;
+    c = a + b;
+    return c;
+}
